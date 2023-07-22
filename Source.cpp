@@ -13,73 +13,37 @@ int main() {
 
     SDL_Init(SDL_INIT_EVERYTHING);
 
+    SDL_DisplayMode dm; SDL_GetCurrentDisplayMode(0, &dm);
+
+    int w_ = dm.w - dm.w / 4;
+    int h_ = dm.h - dm.h / 4;
+
     SDL_Window* window = SDL_CreateWindow("3D",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        640*2,
-        640*2,
+        w_,
+        h_,
         SDL_WINDOW_OPENGL);
 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     int w; int h; SDL_GetWindowSize(window, &w, &h);
-    Camera c(renderer, window, 95, (double)h / w, 1, 500, 0, 0, 0, 0, 0, 0);
-    Eigen::Vector4d p1(623, 67, -20, 1);
-    Eigen::Vector4d p2(351, 558, -20, 1);
-    Eigen::Vector4d p3(861, 581, -20, 1);
-    std::vector<Eigen::Vector4d> triangle;
-    Eigen::Vector4d triangle_centroid;
-    triangle_centroid << 612, 402, -20, 1;
-    triangle.push_back(p1);
-    triangle.push_back(p2);
-    triangle.push_back(p3);
+    Eigen::Vector3d initN; initN << 0, 0, 1;
+    Eigen::Vector3d initV; initV << 0, 1, 0;
+    Camera c(renderer, window, 100, ((double)w)/h, 0.01, 5000, initN, initV, 0, 0, 0);
 
-    std::vector<Eigen::Vector4d> triangle_REF;
-    Eigen::Vector4d triangle_REF_centroid;
-    triangle_REF_centroid << 512, 402, -40, 1;
-    Eigen::Vector4d p1_REF(523, 67, -40, 1);
-    Eigen::Vector4d p2_REF(251, 558, -40, 1);
-    Eigen::Vector4d p3_REF(761, 581, -40, 1);
-    triangle_REF.push_back(p1_REF);
-    triangle_REF.push_back(p2_REF);
-    triangle_REF.push_back(p3_REF);
-
-    // Stars
-    int star_distance = 200;
-    int star_cnt = 500;
-    int star_max_dx = 10;
-    std::vector<std::vector<Eigen::Vector4d>> stars;
-    for (int i = 0; i < star_cnt; i++) {
-        int star_dx = rand() % star_max_dx;
-        int star_dy = rand() % star_max_dx;
-        int star_x;
-        if (rand() % 10 > 5) {
-            star_x = rand() % star_distance;
-        }
-        else {
-            star_x = (-1) * (rand() % star_distance);
-        }
-        int star_y;
-        if (rand() % 10 > 5) {
-            star_y = rand() % star_distance;
-        }
-        else {
-            star_y = (-1) * (rand() % star_distance);
-        }
-        int star_z;
-        if (rand() % 10 > 5) {
-            star_z = rand() % star_distance;
-        }
-        else {
-            star_z = (-1) * (rand() % star_distance);
-        }
-
-        std::vector<Eigen::Vector4d> star;
-        Eigen::Vector4d star_p1; star_p1 << star_x, star_y, star_z, 1;
-        Eigen::Vector4d star_p2; star_p2 << star_x + star_dx, star_y, star_z, 1;
-        Eigen::Vector4d star_p3; star_p3 << star_x, star_y + star_dy, star_z, 1;
-        star.push_back(star_p1); star.push_back(star_p2); star.push_back(star_p3);
-        stars.push_back(star);
-    }
+    Object o;
+    o.world_position << 0, 0, 10, 1;
+    o.pitch = 0;
+    o.yaw = 0;
+    o.roll = 0;
+    o.scale_x = 1;
+    o.scale_y = 1;
+    o.scale_z = 1;
+    std::vector<Eigen::Vector4d> verts;
+    verts.push_back(Eigen::Vector4d(-0.5, -0.5, 0, 1));
+    verts.push_back(Eigen::Vector4d(0, 0.5, 0, 1));
+    verts.push_back(Eigen::Vector4d(0.5, -0.5, 0, 1));
+    o.vertices = verts;
 
     SDL_Event ev;
     bool running = true;
@@ -92,61 +56,16 @@ int main() {
                 break;
             case SDL_KEYDOWN:
                 switch (ev.key.keysym.sym) {
-                case SDLK_LEFT:
-                    c.setAngles(c.getYaw() - MIN_TURN_ANGLE, c.getPitch(), c.getRoll());
-                    break;
-                case SDLK_RIGHT:
-                    c.setAngles(c.getYaw() + MIN_TURN_ANGLE, c.getPitch(), c.getRoll());
-                    break;
-                case SDLK_UP:
-                    c.setAngles(c.getYaw(), c.getPitch() + MIN_TURN_ANGLE, c.getRoll());
-                    break;
-                case SDLK_DOWN:
-                    c.setAngles(c.getYaw(), c.getPitch() - MIN_TURN_ANGLE, c.getRoll());
-                    break;
-                case SDLK_SPACE:
-                    c.setAngles(c.getYaw(), c.getPitch(), c.getRoll() + MIN_TURN_ANGLE);
-                    break;
-                case SDLK_w:
-                    c.setXYZ(c.getX(), c.getY(), c.getZ() + MIN_MOVE_AMT);
-                    break;
-                case SDLK_s:
-                    c.setXYZ(c.getX(), c.getY(), c.getZ() - MIN_MOVE_AMT);
-                    break;
-                case SDLK_a:
-                    c.setXYZ(c.getX(), c.getY() - MIN_MOVE_AMT, c.getZ());
-                    break;
-                case SDLK_d:
-                    c.setXYZ(c.getX(), c.getY() + MIN_MOVE_AMT, c.getZ());
+                    default:
                     break;
                 }
             }
         }
+        //c.setAngles(c.getYaw() + 1 / (M_PI * 10000), 0, 0);
+        //c.setAngles(0, c.getPitch() + 1 / (M_PI * 10000), 0);
+        //c.setXYZ(0, 0, c.getZ() + 0.1);
         SDL_RenderClear(renderer);
-        /*std::cout << "YAW: " <<  c.getYaw() << std::endl;
-        std::cout << "PITCH: " << c.getPitch() << std::endl;
-        std::cout << "PITCH: " << c.getRoll() << std::endl;*/
-        //c.setXYZ(c.getX(), c.getY(), c.getZ() - 0.5);
-        //c.setAngles(c.getYaw() + 1 / (2 * M_PI * 10), 0, 0);
-        //c.setAngles(c.getYaw() + 3/(2*M_PI), c.getPitch() + 2 / (2 * M_PI), c.getRoll() + 1 / (2 * M_PI));
-        /*if (c.getYaw() <= 1.5) {
-            c.setAngles(c.getYaw() + 1 / (2 * M_PI * 10), 0, 0);
-            c.setAngles(0, 0, c.getRoll() + 1 / (10* 2 * M_PI));
-            c.setAngles(0, c.getPitch() + 1 / (2 * M_PI), 0);
-        }
-        else {
-            c.setAngles(0, 0, 0);
-        }*/
-        //c.setAngles(c.getYaw() + 1 / (1 * M_PI * 10), CAMERA_DEFAULT_PITCH_RADIANS, 0);
-        //c.setAngles(c.getYaw() + 1 / (12 * M_PI), c.getPitch() + 1 / (8 * M_PI), c.getRoll() + 1 / (4 * M_PI));
-        //c.setAngles(0, c.getPitch() + 1 / (0.00001 * M_PI), 0);
-        //c.setAngles(0, 0, c.getRoll() + 1 / (30* 2 * M_PI));
-        c.render_polygon_full(triangle_REF_centroid, triangle_REF, 0, 132, 255, 255);
-        c.render_polygon_full(triangle_centroid, triangle, 255, 0, 132, 255);
-        /*for (size_t i = 0; i < star_cnt; i++) {
-            Eigen::Vector4d dummy_centroid;
-            c.render_polygon_full(dummy_centroid, stars[i], 255, 0, 0, 255);
-        }*/
+        c.render_object(o);
         SDL_RenderPresent(renderer);
 
         if (first_time) {
