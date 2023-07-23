@@ -43,7 +43,11 @@ public:
 
 	double getX() { return x; }
 	double getY() { return y; }
-	double getZ() { return z; }
+	double getZ() { return z; }\
+
+	Eigen::Vector3d get_u() { return u; }
+	Eigen::Vector3d get_v() { return v; }
+	Eigen::Vector3d get_n() { return n; }
 	//void render_polygon_wireframe(std::vector<Eigen::Vector4d>& world_coords_of_polygon);
 private:
 	Eigen::Vector4d world_to_screen(Eigen::Vector4d world_coords);

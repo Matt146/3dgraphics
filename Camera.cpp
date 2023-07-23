@@ -72,10 +72,15 @@ void Camera::render_object(const Object& obj) {
 	make_view_matrix();
 	make_perspective_matrix();
 
+	int w; int h;
+	SDL_GetWindowSize(window, &w, &h);
+
 	std::cout << std::endl;
 	for (size_t i = 0; i < verts.size(); i++) {
 		// NEAR CLIPPING
-		if (n.dot(t_4d_to_3d(view_matrix * model_matrix * verts[i])) < znear) {
+		Eigen::Vector4d cur_coords; cur_coords << x, y, z, 1;
+		Eigen::Vector4d plane_point = t_3d_to_4d(n) * znear + cur_coords;
+		if (n.dot(t_4d_to_3d(((model_matrix * verts[i]) - plane_point))) < 0) {
 			return;
 		}
 
@@ -87,16 +92,12 @@ void Camera::render_object(const Object& obj) {
 			verts[i](2) /= verts[i](3);
 		}
 
-		int w; int h;
-		SDL_GetWindowSize(window, &w, &h);
-		//verts[i](0) += w/2;
-		//verts[i](1) = (h/2 - verts[i](1));
 		verts[i](0) = ((double)w/2) * (1 + verts[i](0));
 		verts[i](1) = ((double)h/2) * (1 + verts[i](1));
 	}
 
 	// Render the object now
-	printf("\n\n");
+	//printf("\n\n");
 	SDL_Vertex* verts_in_sdl_form = new SDL_Vertex[verts.size()];
 	size_t cur_vert_idx = 0;
 	for (size_t i = 0; i < verts.size(); i++) {
@@ -104,7 +105,7 @@ void Camera::render_object(const Object& obj) {
 		verts_in_sdl_form[cur_vert_idx].position.y = verts[i](1);
 		verts_in_sdl_form[cur_vert_idx].color = {255, 0, 0, 255};
 		verts_in_sdl_form[cur_vert_idx].tex_coord = {1, 1};
-		printf("(X,Y): (%f, %f)\n", verts_in_sdl_form[cur_vert_idx].position.x, verts_in_sdl_form[cur_vert_idx].position.y);
+		//printf("(X,Y): (%f, %f)\n", verts_in_sdl_form[cur_vert_idx].position.x, verts_in_sdl_form[cur_vert_idx].position.y);
 		cur_vert_idx += 1;
 	}
 	if (cur_vert_idx < 2) { return; }
