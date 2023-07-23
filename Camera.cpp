@@ -38,8 +38,14 @@ void Camera::setAngles(double yaw, double pitch, double roll) {
 	this->yaw = yaw;
 	this->pitch = pitch;
 	this->roll = roll;
-	Eigen::Quaterniond quat;
-	quat = Eigen::AngleAxisd(roll, Eigen::Vector3d::UnitZ()) * Eigen::AngleAxisd(pitch, Eigen::Vector3d::UnitX()) * Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitY());
+	/*quat = Eigen::AngleAxisd(roll, Eigen::Vector3d::UnitZ()) * Eigen::AngleAxisd(pitch, Eigen::Vector3d::UnitX()) * Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitY());
+	n = quat * Eigen::Vector3d(0, 0, 1);
+	v = quat * Eigen::Vector3d(0, 1, 0);
+	u = quat * Eigen::Vector3d(1, 0, 0);*/
+	Eigen::AngleAxisd rollAngle(roll, Eigen::Vector3d::UnitZ());
+	Eigen::AngleAxisd yawAngle(yaw, Eigen::Vector3d::UnitY());
+	Eigen::AngleAxisd pitchAngle(pitch, Eigen::Vector3d::UnitX());
+	Eigen::Quaternion<double> quat = rollAngle * yawAngle * pitchAngle;
 	n = quat * Eigen::Vector3d(0, 0, 1);
 	v = quat * Eigen::Vector3d(0, 1, 0);
 	u = quat * Eigen::Vector3d(1, 0, 0);

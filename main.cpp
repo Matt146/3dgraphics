@@ -6,7 +6,15 @@
 #include "Cube.h"
 
 #define MIN_TURN_ANGLE (1 / (M_PI * 5))
-#define MIN_MOVE_AMT 0.4
+#define MIN_MOVE_AMT 0.8
+
+void draw_crosshair(SDL_Renderer* renderer, int w, int h) {
+    int xcenter = w / 2;
+    int ycenter = h / 2;
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_Rect rect = {xcenter - 5, ycenter - 5, 5, 5};
+    SDL_RenderDrawRect(renderer, &rect);
+}
 
 int main() {
     srand(time(NULL));
@@ -63,25 +71,25 @@ int main() {
                 switch (ev.key.keysym.sym) {
                     case SDLK_w:
                         new_x = c.getX() + MIN_MOVE_AMT * n_vec(0);
-                        new_y = c.getY() + MIN_MOVE_AMT * n_vec(1);
+                        //new_y = c.getY() + MIN_MOVE_AMT * n_vec(1);
                         new_z = c.getZ() + MIN_MOVE_AMT * n_vec(2);
                         c.setXYZ(new_x, new_y, new_z);
                         break;
                     case SDLK_s:
                         new_x = c.getX() - MIN_MOVE_AMT * n_vec(0);
-                        new_y = c.getY() - MIN_MOVE_AMT * n_vec(1);
+                        //new_y = c.getY() - MIN_MOVE_AMT * n_vec(1);
                         new_z = c.getZ() - MIN_MOVE_AMT * n_vec(2);
                         c.setXYZ(new_x, new_y, new_z);
                         break;
                     case SDLK_a:
                         new_x = c.getX() + MIN_MOVE_AMT * u_vec(0);
-                        new_y = c.getY() + MIN_MOVE_AMT * u_vec(1);
+                        //new_y = c.getY() + MIN_MOVE_AMT * u_vec(1);
                         new_z = c.getZ() + MIN_MOVE_AMT * u_vec(2);
                         c.setXYZ(new_x, new_y, new_z);
                         break;
                     case SDLK_d:
                         new_x = c.getX() - MIN_MOVE_AMT * u_vec(0);
-                        new_y = c.getY() - MIN_MOVE_AMT * u_vec(1);
+                        //new_y = c.getY() - MIN_MOVE_AMT * u_vec(1);
                         new_z = c.getZ() - MIN_MOVE_AMT * u_vec(2);
                         c.setXYZ(new_x, new_y, new_z);
                         break;
@@ -102,7 +110,7 @@ int main() {
         double n_mouse_x = ((double)mouse_x / w) * 5;
         double n_mouse_y = ((double)mouse_y / h) * 5;
 
-        c.setAngles(c.getYaw() + -1 * n_mouse_x, c.getPitch() + -1 * n_mouse_y, 0);
+        c.setAngles(c.getYaw() + -1 * n_mouse_x, c.getPitch() + n_mouse_y, 0);
 
         printf("Player position: (%lf, %lf, %lf)\n", c.getX(), c.getY(), c.getZ());
         printf("Player yaw/pitch/roll: (%lf, %lf, %lf)\n", c.getYaw(), c.getPitch(), c.getRoll());
@@ -111,6 +119,8 @@ int main() {
         SDL_SetRenderDrawColor(renderer, 5, 156, 255, 255);
         SDL_RenderClear(renderer);
         c.render_object(o);
+
+        draw_crosshair(renderer, w, h);
         SDL_RenderPresent(renderer);
 
         if (first_time) {
