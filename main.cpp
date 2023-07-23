@@ -71,26 +71,38 @@ int main() {
                 switch (ev.key.keysym.sym) {
                     case SDLK_w:
                         new_x = c.getX() + MIN_MOVE_AMT * n_vec(0);
-                        //new_y = c.getY() + MIN_MOVE_AMT * n_vec(1);
+                        new_y = c.getY() + MIN_MOVE_AMT * n_vec(1);
                         new_z = c.getZ() + MIN_MOVE_AMT * n_vec(2);
                         c.setXYZ(new_x, new_y, new_z);
                         break;
                     case SDLK_s:
                         new_x = c.getX() - MIN_MOVE_AMT * n_vec(0);
-                        //new_y = c.getY() - MIN_MOVE_AMT * n_vec(1);
+                        new_y = c.getY() - MIN_MOVE_AMT * n_vec(1);
                         new_z = c.getZ() - MIN_MOVE_AMT * n_vec(2);
                         c.setXYZ(new_x, new_y, new_z);
                         break;
                     case SDLK_a:
                         new_x = c.getX() + MIN_MOVE_AMT * u_vec(0);
-                        //new_y = c.getY() + MIN_MOVE_AMT * u_vec(1);
+                        new_y = c.getY() + MIN_MOVE_AMT * u_vec(1);
                         new_z = c.getZ() + MIN_MOVE_AMT * u_vec(2);
                         c.setXYZ(new_x, new_y, new_z);
                         break;
                     case SDLK_d:
                         new_x = c.getX() - MIN_MOVE_AMT * u_vec(0);
-                        //new_y = c.getY() - MIN_MOVE_AMT * u_vec(1);
+                        new_y = c.getY() - MIN_MOVE_AMT * u_vec(1);
                         new_z = c.getZ() - MIN_MOVE_AMT * u_vec(2);
+                        c.setXYZ(new_x, new_y, new_z);
+                        break;
+                    case SDLK_SPACE:
+                        new_x = c.getX() + MIN_MOVE_AMT * v_vec(0);
+                        new_y = c.getY() + MIN_MOVE_AMT * v_vec(1);
+                        new_z = c.getZ() + MIN_MOVE_AMT * v_vec(2);
+                        c.setXYZ(new_x, new_y, new_z);
+                        break;
+                    case SDLK_LSHIFT:
+                        new_x = c.getX() - MIN_MOVE_AMT * v_vec(0);
+                        new_y = c.getY() - MIN_MOVE_AMT * v_vec(1);
+                        new_z = c.getZ() - MIN_MOVE_AMT * v_vec(2);
                         c.setXYZ(new_x, new_y, new_z);
                         break;
                     case SDLK_ESCAPE:
