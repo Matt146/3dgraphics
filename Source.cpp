@@ -119,9 +119,10 @@ int main() {
         double n_mouse_x = ((double)mouse_x / w) * 5;
         double n_mouse_y = ((double)mouse_y / h) * 5;
 
-        c.setAngles(n_mouse_x, -1 * n_mouse_y, 0);
+        c.setAngles(c.getYaw() + n_mouse_x, c.getPitch() + -1 * n_mouse_y, 0);
 
         printf("Player position: (%lf, %lf, %lf)\n", c.getX(), c.getY(), c.getZ());
+        printf("Player yaw/pitch/roll: (%lf, %lf, %lf)\n", c.getYaw(), c.getPitch(), c.getRoll());
 
         // Render the object
         SDL_RenderClear(renderer);

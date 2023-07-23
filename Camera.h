@@ -19,7 +19,7 @@ public:
 		renderer(renderer), window(window), fov(fov), aspect(aspect), znear(znear), zfar(zfar), n(initN), v(initV), u(n.cross(v)),
 		x(initX), y(initY), z(initZ) {
 		make_perspective_matrix();
-		setAngles(0, 0, 0);
+		u = n.cross(v);
 		make_view_matrix();
 	};
 

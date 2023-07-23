@@ -36,7 +36,7 @@ Eigen::Matrix4d Camera::make_model_matrix(const Object& object) {
 }
 
 void Camera::setAngles(double yaw, double pitch, double roll) {
-	this->yaw = yaw;
+	/*this->yaw = yaw;
 	this->pitch = pitch;
 	this->roll = roll;
 
@@ -57,7 +57,15 @@ void Camera::setAngles(double yaw, double pitch, double roll) {
 
 	// handle roll
 	v = rotate_vector_around_axis(v, n, roll);
-	u = rotate_vector_around_axis(u, n, roll);
+	u = rotate_vector_around_axis(u, n, roll);*/
+	this->yaw = yaw;
+	this->pitch = pitch;
+	this->roll = roll;
+	Eigen::Quaterniond quat;
+	quat = Eigen::AngleAxisd(roll, Eigen::Vector3d::UnitZ()) * Eigen::AngleAxisd(pitch, Eigen::Vector3d::UnitX()) * Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitY());
+	n = quat * Eigen::Vector3d(0, 0, 1);
+	v = quat * Eigen::Vector3d(0, 1, 0);
+	u = quat * Eigen::Vector3d(1, 0, 0);
 }
 
 double distance(double x1, double y1, double z1, double x2, double y2, double z2) {
