@@ -3,10 +3,7 @@
 
 #include <SDL2/SDL.h>
 #include <eigen3/Eigen/Dense>
-#include <vector>
-#include <cmath>
-#include "SDL2_gfxPrimitives.h"
-#include "World.h"
+#include "utils.h"
 
 #define CAMERA_DEFAULT_YAW_RADIANS 0
 #define CAMERA_DEFAULT_PITCH_RADIANS 0

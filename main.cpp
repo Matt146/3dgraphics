@@ -3,7 +3,7 @@
 #include <SDL2/SDL.h>
 #include "Camera.h"
 #include <cmath>
-#undef main
+#include "Cube.h"
 
 #define MIN_TURN_ANGLE (1 / (M_PI * 5))
 #define MIN_MOVE_AMT 0.4
@@ -34,27 +34,11 @@ int main() {
     Eigen::Vector3d initV; initV << 0, 1, 0;
     Camera c(renderer, window, 100, ((double)w)/h, 0.001, 5000, initN, initV, 0, 0, 0);
 
-    Object o;
-    o.world_position << 0, 0, 10, 1;
-    o.pitch = 0;
-    o.yaw = 0;
-    o.roll = 0;
-    o.scale_x = 1;
-    o.scale_y = 1;
-    o.scale_z = 1;
-    std::vector<Eigen::Vector4d> verts;
-    /*verts.push_back(Eigen::Vector4d(-0.5, -0.5, 0, 1));
-    verts.push_back(Eigen::Vector4d(0, 0.5, 0, 1));
-    verts.push_back(Eigen::Vector4d(0.5, -0.5, 0, 1));*/
-    verts.push_back(Eigen::Vector4d(-0.5, -0.5, 0, 1));
-    verts.push_back(Eigen::Vector4d(0, 0.5, 0, 1));
-    verts.push_back(Eigen::Vector4d(0.5, -0.5, 0, 1));
-    //verts.push_back(Eigen::Vector4d(0.5, 0.5, 0, 1));
-    /* verts.push_back(Eigen::Vector4d(-0.5, -0.5, 0.5, 1));
-    verts.push_back(Eigen::Vector4d(-0.5, 0.5, 0.5, 1));
-    verts.push_back(Eigen::Vector4d(0.5, -0.5, 0.5, 1));
-    verts.push_back(Eigen::Vector4d(0.5, 0.5, 0.5, 1)); */
-    o.vertices = verts;
+
+    Cube cube(NULL, cube_default_face_color,
+        Eigen::Vector4d(0, 0, 10, 1),
+        1);
+    Object o = cube.getCubeObject();
 
     int prev_mouse_x;
     int prev_mouse_y;
@@ -70,7 +54,6 @@ int main() {
         Eigen::Vector3d u_vec = c.get_u();
         Eigen::Vector3d v_vec = c.get_v();
         Eigen::Vector3d n_vec = c.get_n();
-
         while (SDL_PollEvent(&ev)) {
             switch (ev.type) {
             case SDL_QUIT:
@@ -119,12 +102,13 @@ int main() {
         double n_mouse_x = ((double)mouse_x / w) * 5;
         double n_mouse_y = ((double)mouse_y / h) * 5;
 
-        c.setAngles(c.getYaw() + n_mouse_x, c.getPitch() + -1 * n_mouse_y, 0);
+        c.setAngles(c.getYaw() + -1 * n_mouse_x, c.getPitch() + -1 * n_mouse_y, 0);
 
         printf("Player position: (%lf, %lf, %lf)\n", c.getX(), c.getY(), c.getZ());
         printf("Player yaw/pitch/roll: (%lf, %lf, %lf)\n", c.getYaw(), c.getPitch(), c.getRoll());
 
         // Render the object
+        SDL_SetRenderDrawColor(renderer, 5, 156, 255, 255);
         SDL_RenderClear(renderer);
         c.render_object(o);
         SDL_RenderPresent(renderer);

@@ -1,7 +1,6 @@
 #include "Camera.h"
 #include <cmath>
 #include <iostream>
-#include "utils.h"
 
 void Camera::make_perspective_matrix() {
 	Eigen::Matrix4d pm;
@@ -36,28 +35,6 @@ Eigen::Matrix4d Camera::make_model_matrix(const Object& object) {
 }
 
 void Camera::setAngles(double yaw, double pitch, double roll) {
-	/*this->yaw = yaw;
-	this->pitch = pitch;
-	this->roll = roll;
-
-	v /= v.norm();
-	n /= n.norm();
-
-	u = n.cross(v);
-
-	u /= u.norm();
-
-	// handle yaw
-	n = rotate_vector_around_axis(n, v, yaw);
-	u = rotate_vector_around_axis(u, v, yaw);
-
-	// handle pitch
-	n = rotate_vector_around_axis(n, u, pitch);
-	v = rotate_vector_around_axis(v, u, pitch);
-
-	// handle roll
-	v = rotate_vector_around_axis(v, n, roll);
-	u = rotate_vector_around_axis(u, n, roll);*/
 	this->yaw = yaw;
 	this->pitch = pitch;
 	this->roll = roll;
@@ -73,50 +50,52 @@ double distance(double x1, double y1, double z1, double x2, double y2, double z2
 }
 
 void Camera::render_object(const Object& obj) {
-	std::vector<Eigen::Vector4d> verts = obj.vertices;
+	for (size_t a = 0; a < obj.faces.size(); a++) {
+		std::vector<Eigen::Vector4d> verts = obj.faces[a].vertices;
 
-	// Create model/view/projection matrices
-	Eigen::Matrix4d model_matrix = make_model_matrix(obj);
-	make_view_matrix();
-	make_perspective_matrix();
+		// Create model/view/projection matrices
+		Eigen::Matrix4d model_matrix = make_model_matrix(obj);
+		make_view_matrix();
+		make_perspective_matrix();
 
-	int w; int h;
-	SDL_GetWindowSize(window, &w, &h);
+		int w; int h;
+		SDL_GetWindowSize(window, &w, &h);
 
-	std::cout << std::endl;
-	for (size_t i = 0; i < verts.size(); i++) {
-		// NEAR CLIPPING
-		Eigen::Vector4d cur_coords; cur_coords << x, y, z, 1;
-		Eigen::Vector4d plane_point = t_3d_to_4d(n) * znear + cur_coords;
-		if (n.dot(t_4d_to_3d(((model_matrix * verts[i]) - plane_point))) < 0) {
-			return;
+		std::cout << std::endl;
+		for (size_t i = 0; i < verts.size(); i++) {
+			// NEAR CLIPPING
+			Eigen::Vector4d cur_coords; cur_coords << x, y, z, 1;
+			Eigen::Vector4d plane_point = t_3d_to_4d(n) * znear + cur_coords;
+			if (n.dot(t_4d_to_3d(((model_matrix * verts[i]) - plane_point))) < 0) {
+				return;
+			}
+
+			verts[i] = projec_matrix * view_matrix * model_matrix * verts[i];
+			// perspective divide
+			if (verts[i][3] != 0) {
+				verts[i](0) /= verts[i](3);
+				verts[i](1) /= verts[i](3);
+				verts[i](2) /= verts[i](3);
+			}
+
+			verts[i](0) = ((double)w/2) * (1 + verts[i](0));
+			verts[i](1) = ((double)h/2) * (1 + verts[i](1));
 		}
 
-		verts[i] = projec_matrix * view_matrix * model_matrix * verts[i];
-		// perspective divide
-		if (verts[i][3] != 0) {
-			verts[i](0) /= verts[i](3);
-			verts[i](1) /= verts[i](3);
-			verts[i](2) /= verts[i](3);
+		// Render the object now
+		//printf("\n\n");
+		SDL_Vertex* verts_in_sdl_form = new SDL_Vertex[verts.size()];
+		size_t cur_vert_idx = 0;
+		for (size_t i = 0; i < verts.size(); i++) {
+			verts_in_sdl_form[cur_vert_idx].position.x = verts[i](0);
+			verts_in_sdl_form[cur_vert_idx].position.y = verts[i](1);
+			verts_in_sdl_form[cur_vert_idx].color = obj.faces[a].color;
+			verts_in_sdl_form[cur_vert_idx].tex_coord = {1, 1};
+			//printf("(X,Y): (%f, %f)\n", verts_in_sdl_form[cur_vert_idx].position.x, verts_in_sdl_form[cur_vert_idx].position.y);
+			cur_vert_idx += 1;
 		}
-
-		verts[i](0) = ((double)w/2) * (1 + verts[i](0));
-		verts[i](1) = ((double)h/2) * (1 + verts[i](1));
+		if (cur_vert_idx < 2) { return; }
+		std::cout << SDL_RenderGeometry(renderer, obj.faces[a].texture, verts_in_sdl_form, cur_vert_idx, NULL, 0);
+		delete [] verts_in_sdl_form;
 	}
-
-	// Render the object now
-	//printf("\n\n");
-	SDL_Vertex* verts_in_sdl_form = new SDL_Vertex[verts.size()];
-	size_t cur_vert_idx = 0;
-	for (size_t i = 0; i < verts.size(); i++) {
-		verts_in_sdl_form[cur_vert_idx].position.x = verts[i](0);
-		verts_in_sdl_form[cur_vert_idx].position.y = verts[i](1);
-		verts_in_sdl_form[cur_vert_idx].color = {255, 0, 0, 255};
-		verts_in_sdl_form[cur_vert_idx].tex_coord = {1, 1};
-		//printf("(X,Y): (%f, %f)\n", verts_in_sdl_form[cur_vert_idx].position.x, verts_in_sdl_form[cur_vert_idx].position.y);
-		cur_vert_idx += 1;
-	}
-	if (cur_vert_idx < 2) { return; }
-	SDL_RenderGeometry(renderer, NULL, verts_in_sdl_form, cur_vert_idx, NULL, 0);
-	delete [] verts_in_sdl_form;
 }

@@ -1,21 +1,12 @@
-#ifndef WORLD_H
+/*#ifndef WORLD_H
 #define WORLD_H
 
 #include <eigen3/Eigen/Dense>
 #include <vector>
 #include <map>
+#include <SDL2/SDL.h>
 
-struct Object {
-    std::vector<Eigen::Vector4d> vertices; // vertices in local coordinates
-    Eigen::Vector4d world_position; // position of the object in world space
-    double yaw;
-    double pitch;
-    double roll;
-
-    double scale_x;
-    double scale_y;
-    double scale_z;
-};
+struct Object;
 
 class World {
 public:
@@ -26,4 +17,4 @@ private:
     std::map<uint64_t, Object> objects;
 };
 
-#endif // WORLD_H
+#endif // WORLD_H*/

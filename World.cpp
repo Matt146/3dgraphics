@@ -1,6 +1,7 @@
-#include "World.h"
+/*#include "World.h"
 #include <random>
 #include <limits>
+#include "utils.h"
 
 uint64_t get_rand() {
     std::random_device rd;
@@ -36,4 +37,4 @@ uint64_t World::add_object_to_world(Object& obj, uint64_t obj_id) {
 
 const Object* World::get_object(uint64_t obj_id) {
     return (const Object*)(&objects[obj_id]);
-}
+}*/

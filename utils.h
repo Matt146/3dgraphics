@@ -2,8 +2,27 @@
 #define UTILS_H
 
 #include <eigen3/Eigen/Dense>
+#include <vector>
 
-Eigen::Vector4d rotate_vector(Eigen::Vector4d vec, double yaw, double pitch, double roll) {
+struct Face {
+    std::vector<Eigen::Vector4d> vertices;
+    SDL_Texture* texture = NULL;
+    SDL_Color color = {255, 0, 0, 255};
+};
+
+struct Object {
+    std::vector<Face> faces; // vertices in local coordinates
+    Eigen::Vector4d world_position; // position of the object in world space
+    double yaw;
+    double pitch;
+    double roll;
+
+    double scale_x;
+    double scale_y;
+    double scale_z;
+};
+
+inline Eigen::Vector4d rotate_vector(Eigen::Vector4d vec, double yaw, double pitch, double roll) {
 	Eigen::Vector4d result;
 
 	double oldZ = vec(2);
@@ -35,7 +54,7 @@ Eigen::Vector4d rotate_vector(Eigen::Vector4d vec, double yaw, double pitch, dou
 	return result;
 }
 
-Eigen::Matrix4d make_rotation_matrix(double yaw, double pitch, double roll) {
+inline Eigen::Matrix4d make_rotation_matrix(double yaw, double pitch, double roll) {
     Eigen::Matrix4d yawMatrix;
 	yawMatrix << cos(roll), -sin(roll), 0, 0,
 		sin(roll), cos(roll), 0, 0,
@@ -58,7 +77,7 @@ Eigen::Matrix4d make_rotation_matrix(double yaw, double pitch, double roll) {
     return rotMatrix;
 }
 
-Eigen::Vector4d translate_vector(Eigen::Vector4d vec,
+inline Eigen::Vector4d translate_vector(Eigen::Vector4d vec,
 									double tx, double ty, double tz) {
 	Eigen::Vector4d result;
 
@@ -72,7 +91,7 @@ Eigen::Vector4d translate_vector(Eigen::Vector4d vec,
 	return result;
 }
 
-Eigen::Matrix4d make_translation_matrix(double tx, double ty, double tz) {
+inline Eigen::Matrix4d make_translation_matrix(double tx, double ty, double tz) {
     Eigen::Matrix4d translationMatrix;
 	translationMatrix << 1, 0, 0, tx,
 		0, 1, 0, ty,
@@ -82,7 +101,7 @@ Eigen::Matrix4d make_translation_matrix(double tx, double ty, double tz) {
     return translationMatrix;
 }
 
-Eigen::Vector4d scale_vector(Eigen::Vector4d vec, double scale_x, double scale_y, double scale_z) {
+inline Eigen::Vector4d scale_vector(Eigen::Vector4d vec, double scale_x, double scale_y, double scale_z) {
     Eigen::Vector4d result;
     Eigen::Matrix4d scaleMatrix;
     scaleMatrix << scale_x, 0, 0, 0,
@@ -93,7 +112,7 @@ Eigen::Vector4d scale_vector(Eigen::Vector4d vec, double scale_x, double scale_y
     return result;
 }
 
-Eigen::Matrix4d make_scale_matrix(double scale_x, double scale_y, double scale_z) {
+inline Eigen::Matrix4d make_scale_matrix(double scale_x, double scale_y, double scale_z) {
     Eigen::Matrix4d scaleMatrix;
     scaleMatrix << scale_x, 0, 0, 0,
                     0, scale_y, 0, 0,
@@ -103,13 +122,13 @@ Eigen::Matrix4d make_scale_matrix(double scale_x, double scale_y, double scale_z
     return scaleMatrix;
 }
 
-Eigen::Vector4d t_3d_to_4d(const Eigen::Vector3d& t3) {
+inline Eigen::Vector4d t_3d_to_4d(const Eigen::Vector3d& t3) {
     Eigen::Vector4d result;
     result << t3(0), t3(1), t3(2), 1;
     return result;
 }
 
-Eigen::Vector3d t_4d_to_3d(const Eigen::Vector4d& t4) {
+inline Eigen::Vector3d t_4d_to_3d(const Eigen::Vector4d& t4) {
     Eigen::Vector3d result;
     result << t4(0), t4(1), t4(2);
     return result;
@@ -117,12 +136,39 @@ Eigen::Vector3d t_4d_to_3d(const Eigen::Vector4d& t4) {
 
 // https://en.wikipedia.org/wiki/Rodrigues'_rotation_formula#Matrix_notation
 // vector = v, k = axis, theta = angle
-Eigen::Vector3d rotate_vector_around_axis(Eigen::Vector3d v, Eigen::Vector3d k, double theta) {
+inline Eigen::Vector3d rotate_vector_around_axis(Eigen::Vector3d v, Eigen::Vector3d k, double theta) {
     Eigen::Vector3d result;
 	k /= k.norm();
     result = (v*cos(theta)) + (k.cross(v)*sin(theta)) + (k*(k.dot(v))*(1-cos(theta)));
 
     return result;
+}
+
+inline SDL_Texture* load_texture(SDL_Renderer* renderer, std::string path )
+{
+    //The final texture
+    SDL_Texture* newTexture = NULL;
+
+    //Load image at specified path
+    SDL_Surface* loadedSurface = SDL_LoadBMP( path.c_str() );
+    if( loadedSurface == NULL )
+    {
+        printf( "Unable to load image %s!", path.c_str());
+    }
+    else
+    {
+        //Create texture from surface pixels
+        newTexture = SDL_CreateTextureFromSurface( renderer, loadedSurface );
+        if( newTexture == NULL )
+        {
+            printf( "Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError() );
+        }
+
+        //Get rid of old loaded surface
+        SDL_FreeSurface( loadedSurface );
+    }
+
+    return newTexture;
 }
 
 #endif //UTILS_H
